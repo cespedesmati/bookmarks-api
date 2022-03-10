@@ -1,0 +1,40 @@
+version: "3.8"
+services:
+  nestDbBookmark:
+    container_name: nestDbBookmark
+    image: postgres:13-alpine
+    restart: always
+    environment: 
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: secret
+      POSTGRES_DB: nestbookmarks
+    ports:
+      - 5432:5432
+    volumes:
+      - nest-data:/var/lib/postgresql/data
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgAdmin
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@nestjs.com
+      PGADMIN_DEFAULT_PASSWORD: passPgadmin
+      PGADMIN_DEFAULT_PORT: 80
+    ports:
+      - 80:80
+    volumes:
+      - /var/lib/pgadmin
+    depends_on:
+      - nestDbBookmark
+  nest-bookmarks:
+    build: .
+    ports:
+      - "3000:3000"    
+    volumes:
+      - ./:/app
+      - /app/node_modules
+    depends_on:
+      - nestDbBookmark     
+
+volumes:
+  nest-data: {}
