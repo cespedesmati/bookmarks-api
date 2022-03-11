@@ -33,6 +33,11 @@ services:
     volumes:
       - ./:/app
       - /app/node_modules
+    environment: 
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: secret
+      POSTGRES_DB: nestbookmarks
+      POSTGRES_HOST: nestDbBookmark
     depends_on:
       - nestDbBookmark     
 
