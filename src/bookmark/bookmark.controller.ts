@@ -17,7 +17,9 @@ export class BookmarkController {
 
   @Post()
   create(@Body() createBookmarkDto: CreateBookmarkDto) {
-    return this.bookmarkService.create(createBookmarkDto);
+    const newBookMark = this.bookmarkService.create(createBookmarkDto);
+    console.log(`hola${newBookMark}`);
+    return newBookMark;
   }
 
   @Get()
@@ -27,7 +29,7 @@ export class BookmarkController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.bookmarkService.findOne(+id);
+    return this.bookmarkService.findOne(id);
   }
 
   @Patch(':id')

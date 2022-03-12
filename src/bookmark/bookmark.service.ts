@@ -1,4 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateBookmarkDto } from './dto/create-bookmark.dto';
@@ -21,23 +27,38 @@ export class BookmarkService {
     return await this.bookMarkRepository.find();
   }
 
-  async findOne(id: number) {
-    return await this.bookMarkRepository.findOne(id);
+  async findOne(id: string) {
+    try {
+      return await this.bookMarkRepository.findOne(id);
+    } catch (error) {
+      Logger.error(`Could not find user with IDs: ${id}`, 'BookMarkService');
+      throw new HttpException(
+        `User with id: ${id} does not exist`,
+        HttpStatus.NOT_FOUND,
+      );
+    }
   }
 
   async update(id: string, updateBookmartDto: UpdateBookmarkDto) {
-    const update = await this.bookMarkRepository.preload({
-      id,
-      ...updateBookmartDto,
-    });
-
-    return await this.bookMarkRepository.save(update);
+    try {
+      const update = await this.bookMarkRepository.preload({
+        id,
+        ...updateBookmartDto,
+      });
+      return await this.bookMarkRepository.save(update);
+    } catch (error) {
+      throw new NotFoundException(`User with id:  ${id} does not exist`);
+    }
   }
 
   async remove(id: number) {
-    const { affected } = await this.bookMarkRepository.delete(id);
-    if (affected) {
-      return { message: `user with ${id} removed successfully` };
+    try {
+      const { affected } = await this.bookMarkRepository.delete(id);
+      if (affected) {
+        return { message: `user with ${id} removed successfully` };
+      }
+    } catch (error) {
+      throw new NotFoundException(`User with id:  ${id} does not exist`);
     }
   }
 }
