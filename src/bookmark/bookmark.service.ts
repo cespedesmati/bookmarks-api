@@ -47,7 +47,7 @@ export class BookmarkService {
       });
       return await this.bookMarkRepository.save(update);
     } catch (error) {
-      throw new NotFoundException(`User with id:  ${id} does not exist`);
+      throw new NotFoundException(`Bookmark with id:  ${id} does not exist`);
     }
   }
 
@@ -55,10 +55,10 @@ export class BookmarkService {
     try {
       const { affected } = await this.bookMarkRepository.delete(id);
       if (affected) {
-        return { message: `user with ${id} removed successfully` };
+        return { message: `Bookmark with ${id} removed successfully` };
       }
     } catch (error) {
-      throw new NotFoundException(`User with id:  ${id} does not exist`);
+      throw new NotFoundException(`Bookmark with id: ${id} does not exist`);
     }
   }
 }

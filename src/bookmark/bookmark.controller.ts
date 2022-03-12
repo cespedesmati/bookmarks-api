@@ -18,7 +18,6 @@ export class BookmarkController {
   @Post()
   create(@Body() createBookmarkDto: CreateBookmarkDto) {
     const newBookMark = this.bookmarkService.create(createBookmarkDto);
-    console.log(`hola${newBookMark}`);
     return newBookMark;
   }
 

@@ -1,26 +1,29 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateAuthDto } from './dto/create-auth.dto';
 import { UpdateAuthDto } from './dto/update-auth.dto';
-
+import { UserService } from '../user/user.service';
+import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
+import * as argon from 'argon2';
 @Injectable()
 export class AuthService {
-  create(createAuthDto: CreateAuthDto) {
-    return 'This action adds a new auth';
-  }
+  constructor(
+    private userService: UserService,
+    private jwt: JwtService,
+    private config: ConfigService,
+  ) {}
 
-  findAll() {
-    return `This action returns all auth`;
-  }
+  async signup(authDto: CreateAuthDto) {
+    try {
+      const hash = await argon.hash(authDto.password);
 
-  findOne(id: number) {
-    return `This action returns a #${id} auth`;
-  }
-
-  update(id: number, updateAuthDto: UpdateAuthDto) {
-    return `This action updates a #${id} auth`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} auth`;
+      const user = await this.userService.create({
+        email: authDto.email,
+        password: hash,
+      });
+      return { id: user.id, email: user.email };
+    } catch (error) {
+      throw new HttpException(error, HttpStatus.BAD_REQUEST);
+    }
   }
 }
