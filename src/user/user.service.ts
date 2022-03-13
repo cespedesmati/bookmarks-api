@@ -1,5 +1,11 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  HttpException,
+  HttpStatus,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { isUUID } from 'class-validator';
 import { Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -22,10 +28,29 @@ export class UserService {
   }
 
   async findOne(id: string) {
+    if (!isUUID(id)) {
+      //ver si es mas practico validar por @ en controller
+      throw new HttpException(
+        `Invalid syntax for id: ${id}`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    const user = await this.userRepository.findOne(id);
+    if (!user) {
+      throw new NotFoundException(`User with id: ${id} does not exist`);
+    }
+    return user;
+  }
+
+  async findOneByMail(emailUser: string) {
     try {
-      return await this.userRepository.findOne(id);
+      return await this.userRepository.findOne({
+        where: [{ email: emailUser }],
+      });
     } catch (error) {
-      throw new NotFoundException(`User with id:  ${id} does not exist`);
+      throw new NotFoundException(
+        `User with email: ${emailUser} does not exist`,
+      );
     }
   }
 

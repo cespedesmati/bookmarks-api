@@ -1,6 +1,10 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { CreateAuthDto } from './dto/create-auth.dto';
-import { UpdateAuthDto } from './dto/update-auth.dto';
+import {
+  HttpException,
+  HttpStatus,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
+import { AuthDto } from './dto/auth.dto';
 import { UserService } from '../user/user.service';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
@@ -13,7 +17,7 @@ export class AuthService {
     private config: ConfigService,
   ) {}
 
-  async signup(authDto: CreateAuthDto) {
+  async signup(authDto: AuthDto) {
     try {
       const hash = await argon.hash(authDto.password);
 
@@ -25,5 +29,38 @@ export class AuthService {
     } catch (error) {
       throw new HttpException(error, HttpStatus.BAD_REQUEST);
     }
+  }
+
+  async signin(authDto: AuthDto) {
+    const findUser = await this.userService.findOneByMail(authDto.email);
+    if (!findUser) {
+      throw new HttpException('User does not exist.', HttpStatus.NOT_FOUND);
+    }
+
+    const checkPass = await argon.verify(findUser.password, authDto.password);
+    if (!checkPass) {
+      throw new UnauthorizedException();
+    }
+
+    return this.singToken(findUser.id, findUser.email);
+  }
+
+  async singToken(userId: string, email: string) {
+    const payload = {
+      sub: userId,
+      email: email,
+    };
+
+    const secret = this.config.get('JWT_SECRET');
+
+    const token = await this.jwt.signAsync(payload, {
+      expiresIn: '1h',
+      secret: secret,
+    });
+
+    return {
+      access_token: token,
+      user: email,
+    };
   }
 }
