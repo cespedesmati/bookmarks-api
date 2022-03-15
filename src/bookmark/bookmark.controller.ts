@@ -6,10 +6,12 @@ import {
   Patch,
   Param,
   Delete,
+  Query,
 } from '@nestjs/common';
 import { BookmarkService } from './bookmark.service';
 import { CreateBookmarkDto } from './dto/create-bookmark.dto';
 import { UpdateBookmarkDto } from './dto/update-bookmark.dto';
+import { Pagination } from './dto/pagination.dto';
 
 @Controller('bookmark')
 export class BookmarkController {
@@ -22,8 +24,8 @@ export class BookmarkController {
   }
 
   @Get()
-  findAll() {
-    return this.bookmarkService.findAll();
+  findAll(@Query() paginationOption: Pagination) {
+    return this.bookmarkService.findAll(paginationOption);
   }
 
   @Get(':id')

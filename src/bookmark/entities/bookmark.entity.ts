@@ -1,14 +1,24 @@
-import { Column, Entity, PrimaryGeneratedColumn, Unique } from 'typeorm';
+import { User } from 'src/user/entities/user.entity';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 
 @Entity()
-@Unique('my_unique_constraint', ['title'])
 export class Bookmark {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ unique: true })
+  @Column()
   title: string;
 
   @Column()
   link: string;
+
+  @ManyToOne((type) => User, (user) => user.bookMarks, { cascade: true })
+  @JoinColumn({ name: 'user_id' })
+  user: User;
 }

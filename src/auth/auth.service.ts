@@ -27,7 +27,7 @@ export class AuthService {
       });
       return { id: user.id, email: user.email };
     } catch (error) {
-      throw new HttpException(error, HttpStatus.BAD_REQUEST);
+      throw new HttpException(error.driverError.detail, HttpStatus.BAD_REQUEST);
     }
   }
 

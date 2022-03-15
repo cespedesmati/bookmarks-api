@@ -8,6 +8,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateBookmarkDto } from './dto/create-bookmark.dto';
+import { Pagination } from './dto/pagination.dto';
 import { UpdateBookmarkDto } from './dto/update-bookmark.dto';
 import { Bookmark } from './entities/bookmark.entity';
 
@@ -23,13 +24,17 @@ export class BookmarkService {
     return await this.bookMarkRepository.save(newBookMark);
   }
 
-  async findAll() {
-    return await this.bookMarkRepository.find();
+  async findAll({ limit, offset }: Pagination) {
+    return await this.bookMarkRepository.find({
+      relations: ['user'],
+      skip: offset,
+      take: limit,
+    });
   }
 
   async findOne(id: string) {
     try {
-      return await this.bookMarkRepository.findOne(id);
+      return await this.bookMarkRepository.findOne(id, { relations: ['user'] });
     } catch (error) {
       Logger.error(`Could not find user with IDs: ${id}`, 'BookMarkService');
       throw new HttpException(
